@@ -18,7 +18,7 @@ apiClient.interceptors.request.use(
 apiClient.interceptors.response.use(
   (response) => response,
   async (error) => {
-    console.log('API Error:', error?.response?.status, error?.message);
+    // console.log('API Error:', error?.response?.status, error?.message);
 
     return Promise.reject(error);
   }

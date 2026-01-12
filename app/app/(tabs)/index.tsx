@@ -10,12 +10,17 @@ import {
   StatusBar,
   useColorScheme,
   TouchableOpacity,
+  ImageBackground,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { queryClient } from '../utils/queryClient';
 import { useQuery } from '@tanstack/react-query';
 import { getChapters } from '@/services/quranApi';
 import { Surah } from '@/types/quranTypes';
+import { DailyPrayerResponse } from '@/types/islamicCalenderTypes';
+import { fetchCalendar } from '@/services/calenderApi';
+import { Ionicons, Feather } from '@expo/vector-icons';
+import { Image } from 'expo-image';
 
 const HomeScreen = () => {
   const colorScheme = useColorScheme();
@@ -23,77 +28,14 @@ const HomeScreen = () => {
   const scheme: ColorSchemeKey = (colorScheme ?? 'light') as ColorSchemeKey;
   const colors = Colors[scheme] as (typeof Colors)['light'];
 
-  //   useEffect(() => {
-  //   const cleanupSearching = rideSearching(socket, (data) => {
-  //     console.log('Ride searching:', data);
-  //   });
-
-  //   const cleanupDriverFound = rideDriverFound(socket, (data) => {
-  //     console.log('Driver found:', data);
-  //   });
-
-  //   // Cleanup on unmount
-  //   return () => {
-  //     cleanupSearching();
-  //     cleanupDriverFound();
-  //   };
-  // }, [socket]);
-
-  const [selectedTab, setSelectedTab] = useState('Sura');
-
-  const lastReadSurahs = [
-    { name: 'Al-Baqarah', verse: 'Verse 285' },
-    { name: 'Al-Mumtahanah', verse: 'Verse 9' },
-    { name: 'Al-Mulk', verse: 'Verse 12' },
-  ];
-
-  // const surahs = [
-  //   {
-  //     number: 1,
-  //     name: 'Al-Fatihah',
-  //     arabic: 'الفاتحة',
-  //     verses: '7 Verses',
-  //     revelation: 'Meccan',
-  //   },
-  //   {
-  //     number: 2,
-  //     name: 'Al-Baqarah',
-  //     arabic: 'البقرة',
-  //     verses: '286 Verses',
-  //     revelation: 'Medinan',
-  //   },
-  //   {
-  //     number: 3,
-  //     name: 'Aal-e-Imran',
-  //     arabic: 'آل عمران',
-  //     verses: '200 Verses',
-  //     revelation: 'Medinan',
-  //   },
-  //   {
-  //     number: 4,
-  //     name: "An-Nisa'",
-  //     arabic: 'النساء',
-  //     verses: '176 Verses',
-  //     revelation: 'Medinan',
-  //   },
-  //   {
-  //     number: 5,
-  //     name: "Al-Ma'idah",
-  //     arabic: 'المائدة',
-  //     verses: '120 Verses',
-  //     revelation: 'Medinan',
-  //   },
-  // ];
-
-  const {
-    data: surahs,
-    isLoading,
-    isError,
-    error,
-  } = useQuery<Surah[]>({
-    queryKey: ['chapters'],
-    queryFn: () => getChapters(),
+  const { data, isLoading } = useQuery<DailyPrayerResponse>({
+    queryKey: ['calendar'],
+    queryFn: async () => await fetchCalendar(),
   });
+
+  console.log(data?.date.hijri.month.en);
+
+  const blurhash = 'LGFO_ftQ01WBuPNGi^ax02M{^%W=';
 
   return (
     <SafeAreaView
@@ -105,110 +47,42 @@ const HomeScreen = () => {
         backgroundColor="transparent"
       />
 
-      {/* Header */}
-      <View style={[styles.header, { backgroundColor: colors.background }]}>
+      <Image
+        style={{
+          height: 400,
+          marginTop: -70,
+        }}
+        source="https://cdn.pixabay.com/photo/2018/12/17/14/25/mosque-3880493_960_720.jpg"
+        placeholder={{ blurhash }}
+        contentFit="cover"
+        transition={1000}
+      ></Image>
+      <View style={[styles.header, { marginTop: -330 }]}>
         <Text style={[styles.headerTitle, { color: colors.text }]}>
-          Al Quran
+          {data?.date.hijri.month.number} {data?.date.hijri.month.en}{' '}
+          {data?.date.hijri.year} AH
         </Text>
-        <TouchableOpacity style={[styles.searchButton]}>
-          <SearchIcon width={25} height={25} color="#A67C52" />
-        </TouchableOpacity>
       </View>
-
-      <ScrollView
-        style={styles.scrollView}
-        showsVerticalScrollIndicator={false}
-      >
-        <View
-          style={[
-            styles.tabContainer,
-            {
-              backgroundColor:
-                scheme === 'dark'
-                  ? Colors.dark.secondary
-                  : Colors.light.secondary,
-            },
-          ]}
-        >
-          {['Sura', 'Juz'].map((tab) => (
-            <TouchableOpacity
-              key={tab}
-              style={[
-                styles.tab,
-                selectedTab === tab && {
-                  backgroundColor:
-                    scheme === 'dark'
-                      ? Colors.dark.secondary
-                      : Colors.light.secondary,
-                },
-              ]}
-              onPress={() => setSelectedTab(tab)}
-            >
-              <Text
-                style={[
-                  styles.tabText,
-                  { color: '#FFFFFF' },
-                  selectedTab === tab && styles.tabTextActive,
-                ]}
-              >
-                {tab}
+      <View style={{ marginTop: 300 }}>
+        {[0, 1, 2, 3, 4, 5].map((item) => (
+          <View
+            key={item}
+            style={{
+              backgroundColor: 'red',
+              flexDirection: 'row',
+              justifyContent: 'space-between',
+              paddingHorizontal: 20,
+              paddingVertical: 10,
+            }}
+          >
+            <View>
+              <Text style={{ color: colors.text, fontSize: 16 }}>
+                Prayer Name
               </Text>
-            </TouchableOpacity>
-          ))}
-        </View>
-
-        {/* Surah List */}
-        <View style={styles.surahList}>
-          {surahs?.map((surah: Surah) => (
-            <TouchableOpacity
-              key={surah.id}
-              style={[
-                styles.surahItem,
-                {
-                  borderBottomColor:
-                    scheme === 'dark' ? colors.cardBgAlt : '#F0F0F0',
-                },
-              ]}
-              onPress={() =>
-                router.push({
-                  pathname: '/(home)/SurahDetails',
-                  params: {
-                    number: surah.id.toString(),
-                    name: surah.name_complex,
-                    arabic: surah.name_arabic,
-                    verses: surah.verses_count,
-                    revelation: surah.revelation_place,
-                  },
-                })
-              }
-            >
-              <View style={styles.surahLeft}>
-                <View
-                  style={[
-                    styles.surahNumberContainer,
-                    { borderColor: '#A67C52' },
-                  ]}
-                >
-                  <Text style={[styles.surahNumber, { color: '#A67C52' }]}>
-                    {surah.id}
-                  </Text>
-                </View>
-                <View style={styles.surahInfo}>
-                  <Text style={[styles.surahName, { color: colors.text }]}>
-                    {surah.name_complex}
-                  </Text>
-                  <Text style={[styles.surahDetails, { color: '#A67C52' }]}>
-                    {surah.verses_count} | {surah.revelation_place}
-                  </Text>
-                </View>
-              </View>
-              <Text style={[styles.surahArabic, { color: colors.text }]}>
-                {surah.name_arabic}
-              </Text>
-            </TouchableOpacity>
-          ))}
-        </View>
-      </ScrollView>
+            </View>
+          </View>
+        ))}
+      </View>
     </SafeAreaView>
   );
 };

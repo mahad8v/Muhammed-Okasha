@@ -1,6 +1,7 @@
 import { HapticTab } from '@/components/haptic-tab';
 import CompassIcon from '@/components/icons/CompassIcon';
 import { HomeIcon } from '@/components/icons/HomeIcon';
+
 import { QuranIcon } from '@/components/icons/QuranIcon';
 import { Colors } from '@/constants/theme';
 import { Tabs } from 'expo-router';
