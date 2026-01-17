@@ -3482,8 +3482,10 @@ __metadata:
     expo-haptics: "npm:~15.0.7"
     expo-image: "npm:~3.0.9"
     expo-linking: "npm:~8.0.8"
+    expo-location: "npm:~19.0.8"
     expo-router: "npm:~6.0.11"
     expo-secure-store: "npm:~15.0.7"
+    expo-sensors: "npm:~15.0.8"
     expo-splash-screen: "npm:~31.0.10"
     expo-status-bar: "npm:~3.0.8"
     expo-symbols: "npm:~1.0.7"
@@ -5505,6 +5507,15 @@ __metadata:
   languageName: node
   linkType: hard
 
+"expo-location@npm:~19.0.8":
+  version: 19.0.8
+  resolution: "expo-location@npm:19.0.8"
+  peerDependencies:
+    expo: "*"
+  checksum: 10c0/9549ed00d75a7d7780e16a70a9b6703a8aae8f6f2ffbe9f6ab41ef155444f4157cd26b32b1eb051e3a8a6b5b2071b555398e5d672435f240d2c2891fab041da5
+  languageName: node
+  linkType: hard
+
 "expo-modules-autolinking@npm:3.0.15":
   version: 3.0.15
   resolution: "expo-modules-autolinking@npm:3.0.15"
@@ -5601,6 +5612,18 @@ __metadata:
   peerDependencies:
     expo: "*"
   checksum: 10c0/8273f937c3ee289782beb7dcfc293e3b45d230d46f839fda987029dc130bb00c428a23dffb9f009e11f6a2e963f06e32d60c888e9ccfbf7002c15ea0de93e056
+  languageName: node
+  linkType: hard
+
+"expo-sensors@npm:~15.0.8":
+  version: 15.0.8
+  resolution: "expo-sensors@npm:15.0.8"
+  dependencies:
+    invariant: "npm:^2.2.4"
+  peerDependencies:
+    expo: "*"
+    react-native: "*"
+  checksum: 10c0/d7e88f6f94b9396a4e0c292d5d9df04ac607d85b1f67ceb426522497cd62346c245a6fd13ade66fec475252c25124e86c11282cd5190749897cbdf2e49097c65
   languageName: node
   linkType: hard
 
