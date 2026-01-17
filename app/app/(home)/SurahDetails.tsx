@@ -12,6 +12,7 @@ import {
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter, useLocalSearchParams } from 'expo-router';
 import PlayIcon from '@/components/icons/playIcon';
+import Card from '@/components/card';
 
 const SurahDetailScreen = () => {
   const router = useRouter();
@@ -55,55 +56,10 @@ const SurahDetailScreen = () => {
       edges={['top']}
       style={[styles.container, { backgroundColor: colors.background }]}
     >
-      <StatusBar
+      {/* <StatusBar
         barStyle={isDarkMode ? 'light-content' : 'dark-content'}
         backgroundColor="transparent"
-      />
-
-      {/* Header */}
-      {/* <View style={[styles.header, { backgroundColor: colors.background }]}> */}
-      {/* <TouchableOpacity
-          style={styles.backButton}
-          onPress={() => router.back()}
-        >
-          <Text style={[styles.backIcon, { color: colors.text }]}>←</Text>
-        </TouchableOpacity> */}
-
-      {/* <View style={styles.themeToggle}>
-          <TouchableOpacity
-            style={[
-              styles.themeButton,
-              !isDarkMode && { backgroundColor: colors.cardBgAlt },
-            ]}
-            onPress={() => setIsDarkMode(false)}
-          >
-            <Text
-              style={[
-                styles.themeText,
-                { color: !isDarkMode ? colors.text : colors.icon },
-              ]}
-            >
-              Light
-            </Text>
-          </TouchableOpacity>
-          <TouchableOpacity
-            style={[
-              styles.themeButton,
-              isDarkMode && { backgroundColor: colors.cardBgAlt },
-            ]}
-            onPress={() => setIsDarkMode(true)}
-          >
-            <Text
-              style={[
-                styles.themeText,
-                { color: isDarkMode ? colors.text : colors.icon },
-              ]}
-            >
-              Dark
-            </Text>
-          </TouchableOpacity>
-        </View> */}
-      {/* </View> */}
+      /> */}
 
       <ScrollView
         style={styles.scrollView}
@@ -120,7 +76,6 @@ const SurahDetailScreen = () => {
           </Text>
         </View>
 
-        {/* Bismillah */}
         <View style={styles.bismillahContainer}>
           <Text style={[styles.bismillah, { color: colors.text }]}>
             بِسْمِ اللَّهِ الرَّحْمَٰنِ الرَّحِيمِ
@@ -129,11 +84,11 @@ const SurahDetailScreen = () => {
 
         {/* Verses */}
         {verses.map((verse) => (
-          <View
-            key={verse.number}
-            style={[styles.verseCard, { backgroundColor: colors.cardBg }]}
-          >
-            {/* Verse Header */}
+          // <View
+          //   key={verse.number}
+          //   style={[styles.verseCard, { backgroundColor: colors.cardBg }]}
+          // >
+          <Card>
             <View style={styles.verseHeader}>
               <View
                 style={[styles.verseNumberBadge, { borderColor: colors.text }]}
@@ -144,12 +99,6 @@ const SurahDetailScreen = () => {
               </View>
 
               <View style={styles.verseActions}>
-                {/* <TouchableOpacity style={styles.actionButton}>
-                  <Text style={styles.actionIcon}>👁️</Text>
-                </TouchableOpacity>
-                <TouchableOpacity style={styles.actionButton}>
-                  <Text style={styles.actionIcon}>❤️</Text>
-                </TouchableOpacity> */}
                 <TouchableOpacity style={styles.actionButton}>
                   <PlayIcon width={35} height={35} color={colors.icon} />
                 </TouchableOpacity>
@@ -167,7 +116,7 @@ const SurahDetailScreen = () => {
             </Text>
 
             {/* Bottom Actions */}
-          </View>
+          </Card>
         ))}
       </ScrollView>
     </SafeAreaView>
@@ -245,6 +194,7 @@ const styles = StyleSheet.create({
     marginBottom: 20,
     padding: 20,
     borderRadius: 16,
+    backgroundColor: Colors.light.cardBg,
   },
   verseHeader: {
     flexDirection: 'row',
