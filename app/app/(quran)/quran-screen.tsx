@@ -78,14 +78,20 @@ const QuranScreen = () => {
                 },
               ]}
               onPress={() =>
+                // router.push({
+                //   pathname: '/SurahDetailScreen',
+                //   params: {
+                //     number: surah.id.toString(),
+                //     name: surah.name_complex,
+                //     arabic: surah.name_arabic,
+                //     verses: surah.verses_count,
+                //     revelation: surah.revelation_place,
+                //   },
+                // })
                 router.push({
-                  pathname: '/(home)/SurahDetails',
+                  pathname: '/surah/[id]',
                   params: {
-                    number: surah.id.toString(),
-                    name: surah.name_complex,
-                    arabic: surah.name_arabic,
-                    verses: surah.verses_count,
-                    revelation: surah.revelation_place,
+                    id: surah.id.toString(),
                   },
                 })
               }
@@ -201,8 +207,8 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   surahNumberContainer: {
-    width: 40,
-    height: 40,
+    width: 30,
+    height: 30,
     borderRadius: 20,
     borderWidth: 2,
     justifyContent: 'center',

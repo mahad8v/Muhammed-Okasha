@@ -1,5 +1,6 @@
 import { HapticTab } from '@/components/haptic-tab';
 import CompassIcon from '@/components/icons/CompassIcon';
+import DawahIcon from '@/components/icons/Dawag';
 import { HomeIcon } from '@/components/icons/HomeIcon';
 import { QuranIcon } from '@/components/icons/QuranIcon';
 import { Colors } from '@/constants/theme';
@@ -55,11 +56,11 @@ export default function TabLayout() {
       />
 
       <Tabs.Screen
-        name="fig"
+        name="dawa"
         options={{
-          title: 'Fig',
+          title: 'Dawa',
           tabBarIcon: ({ color }) => (
-            <CompassIcon width={25} height={25} color={color} />
+            <DawahIcon width={25} height={25} color={color} />
           ),
         }}
       />

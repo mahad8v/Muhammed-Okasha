@@ -1,69 +1,66 @@
-import { HapticTab } from '@/components/haptic-tab';
-import CompassIcon from '@/components/icons/CompassIcon';
-import { HomeIcon } from '@/components/icons/HomeIcon';
-
-import { QuranIcon } from '@/components/icons/QuranIcon';
+import AsrIcon from '@/components/icons/AsrIcon';
+import BackIcon from '@/components/icons/BackIcon';
 import { Colors } from '@/constants/theme';
-import { Tabs } from 'expo-router';
-import React from 'react';
-import { useColorScheme } from 'react-native';
+import { router, Stack, useLocalSearchParams } from 'expo-router';
+import { TouchableOpacity, useColorScheme } from 'react-native';
 
-export default function TabLayout() {
+export default function QuranLayout() {
   const colorScheme = useColorScheme();
+  const params = useLocalSearchParams();
 
   return (
-    <Tabs
+    <Stack
       screenOptions={{
-        headerShown: false,
-        tabBarActiveTintColor: Colors[colorScheme ?? 'light'].secondary,
-        tabBarInactiveTintColor: Colors[colorScheme ?? 'light'].tabIconDefault,
-        tabBarButton: HapticTab,
-        tabBarStyle: {
+        headerShown: true,
+        animation: 'slide_from_right',
+        headerTitleAlign: 'center',
+        headerShadowVisible: false,
+        headerStyle: {
           backgroundColor: Colors[colorScheme ?? 'light'].background,
-          borderTopWidth: 0,
-          elevation: 5,
+          // backgroundColor: 'red',
         },
+        headerTintColor: Colors[colorScheme ?? 'light'].text,
       }}
     >
-      <Tabs.Screen
-        name="index"
+      {/* Surah Details */}
+      <Stack.Screen
+        name="surah/[id]"
         options={{
-          title: 'Home',
-          tabBarIcon: ({ color }) => (
-            <HomeIcon width={25} height={25} color={color} />
+          title: Array.isArray(params.name)
+            ? (params.name[0] ?? 'Surah')
+            : (params.name ?? 'Surah'),
+          headerBackTitle: 'Quran',
+          headerLeft: () => (
+            <TouchableOpacity onPress={() => router.back()}>
+              <BackIcon
+                width={24}
+                height={24}
+                color={Colors[colorScheme ?? 'light'].text}
+              />
+            </TouchableOpacity>
           ),
         }}
       />
 
-      <Tabs.Screen
-        name="quran"
+      {/* Surahs available for a single reciter */}
+      <Stack.Screen
+        name="reciters/[reciterId]"
         options={{
-          title: 'Quran',
-          tabBarIcon: ({ color }) => (
-            <QuranIcon width={25} height={25} color={color} />
+          title: Array.isArray(params.name)
+            ? (params.name[0] ?? 'Reciter')
+            : (params.name ?? 'Reciter'),
+          headerBackTitle: 'Quran',
+          headerLeft: () => (
+            <TouchableOpacity onPress={() => router.back()}>
+              <BackIcon
+                width={24}
+                height={24}
+                color={Colors[colorScheme ?? 'light'].text}
+              />
+            </TouchableOpacity>
           ),
         }}
       />
-
-      <Tabs.Screen
-        name="qibla"
-        options={{
-          title: 'Qibla',
-          tabBarIcon: ({ color }) => (
-            <CompassIcon width={25} height={25} color={color} />
-          ),
-        }}
-      />
-
-      <Tabs.Screen
-        name="fig"
-        options={{
-          title: 'Fig',
-          tabBarIcon: ({ color }) => (
-            <CompassIcon width={25} height={25} color={color} />
-          ),
-        }}
-      />
-    </Tabs>
+    </Stack>
   );
 }

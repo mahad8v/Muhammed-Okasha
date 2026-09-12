@@ -1,0 +1,102 @@
+quran-app/
+│
+├── app/                         # Expo Router (screens)
+│   ├── _layout.tsx
+│   ├── index.tsx                # Home (Surah list)
+│   │
+│   ├── surah/
+│   │   └── [id].tsx             # Surah details page
+│   │
+│   ├── juz/
+│   │   └── [id].tsx
+│   │
+│   ├── bookmarks/
+│   │   └── index.tsx
+│   │
+│   ├── search/
+│   │   └── index.tsx
+│   │
+│   └── settings/
+│       ├── index.tsx
+│       ├── audio.tsx
+│       ├── translations.tsx
+│       └── appearance.tsx
+│
+├── components/                  # Reusable UI components
+│   ├── surah/
+│   │   ├── SurahCard.tsx
+│   │   ├── AyahItem.tsx
+│   │   └── SurahHeader.tsx
+│   │
+│   ├── audio/
+│   │   ├── AudioPlayer.tsx
+│   │   ├── PlayButton.tsx
+│   │   └── ProgressBar.tsx
+│   │
+│   ├── common/
+│   │   ├── Button.tsx
+│   │   ├── Loader.tsx
+│   │   ├── EmptyState.tsx
+│   │   └── ScreenWrapper.tsx
+│   │
+│   └── icons/
+│       └── ...
+│
+├── features/                    # Feature-based logic (very scalable)
+│   ├── quran/
+│   │   ├── api.ts               # API calls
+│   │   ├── hooks.ts             # React Query hooks
+│   │   ├── types.ts
+│   │   └── utils.ts
+│   │
+│   ├── audio/
+│   │   ├── audio.service.ts
+│   │   ├── useAudioPlayer.ts
+│   │   └── audio.types.ts
+│   │
+│   ├── bookmarks/
+│   │   ├── bookmark.service.ts
+│   │   ├── useBookmarks.ts
+│   │   └── bookmark.types.ts
+│   │
+│   └── search/
+│       ├── search.service.ts
+│       └── useSearch.ts
+│
+├── context/                     # Global state
+│   ├── AuthContext.tsx
+│   ├── SettingsContext.tsx
+│   └── AudioContext.tsx
+│
+├── hooks/                       # Global reusable hooks
+│   ├── useTheme.ts
+│   ├── useDebounce.ts
+│   └── useNetworkStatus.ts
+│
+├── lib/                         # App-level setup
+│   ├── react-query.ts
+│   ├── axios.ts
+│   └── storage.ts
+│
+├── constants/
+│   ├── colors.ts
+│   ├── fonts.ts
+│   └── surahMeta.ts
+│
+├── assets/
+│   ├── fonts/
+│   │   ├── uthmani.ttf
+│   │   └── ...
+│   ├── images/
+│   └── audio/                   # if offline audio
+│
+├── types/
+│   └── global.d.ts
+│
+├── utils/
+│   ├── formatAyahNumber.ts
+│   └── helpers.ts
+│
+├── app.json
+├── tsconfig.json
+└── package.json

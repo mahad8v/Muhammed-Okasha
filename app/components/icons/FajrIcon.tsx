@@ -10,7 +10,7 @@ interface Props {
 const FajrIcon = ({ width, height, color }: Props) => (
   <Svg
     width={width || 24}
-    height={width || 24}
+    height={height || 24}
     className="icon"
     viewBox="0 0 1024 1024"
     fill={color}

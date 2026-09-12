@@ -1,77 +1,106 @@
 import React from 'react';
-import { View, Text, StyleSheet } from 'react-native';
+import { View, Text, StyleSheet, useColorScheme } from 'react-native';
 import { Colors } from '@/constants/theme';
 import Card from '../card';
 
+interface DayInteraction {
+  [key: string]: boolean | 'future';
+}
+
 interface StreaksComponentProps {
   currentStreak: number;
-  colorScheme: 'light' | 'dark';
+  weekInteractions: DayInteraction;
 }
 
 const StreaksComponent: React.FC<StreaksComponentProps> = ({
   currentStreak,
-  colorScheme,
+  weekInteractions,
 }) => {
-  const colors = Colors[colorScheme];
+  const colorScheme = useColorScheme();
+  type ColorSchemeKey = keyof typeof Colors;
+  const scheme: ColorSchemeKey = (colorScheme ?? 'light') as ColorSchemeKey;
+  const colors = Colors[scheme] as (typeof Colors)['light'];
 
   const today = new Date().getDay();
-
   const daysOfWeek = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
 
-  const isChecked = (index: number) => {
-    const daysBack = today - index;
-    if (daysBack >= 0) {
-      return index <= today && today - index < currentStreak;
-    } else {
-      const adjustedDaysBack = 7 + daysBack;
-      return adjustedDaysBack < currentStreak;
-    }
+  const getDayStatus = (day: string, index: number) => {
+    const interaction = weekInteractions[day];
+    const isToday = index === today;
+    const isFuture = interaction === 'future' || index > today;
+
+    return {
+      isToday,
+      isFuture,
+      hasInteracted: interaction === true,
+      missedDay: interaction === false,
+    };
   };
 
   return (
     <Card>
       <View style={styles.header}>
         <Text style={[styles.streakText, { color: colors.text }]}>
-          You're on the {currentStreak} day streaks!
+          You're on a {currentStreak} day streak!
         </Text>
       </View>
 
       <View style={styles.daysContainer}>
         {daysOfWeek.map((day, index) => {
-          const checked = isChecked(index);
-          const isToday = index === today;
+          const status = getDayStatus(day, index);
 
           return (
             <View key={day} style={styles.dayItem}>
-              <Text style={[styles.dayLabel, { color: colors.text }]}>
+              <Text
+                style={[
+                  styles.dayLabel,
+                  {
+                    color: status.isFuture
+                      ? colors.tabIconDefault
+                      : colors.text,
+                  },
+                  status.isFuture && styles.futureText,
+                ]}
+              >
                 {day}
               </Text>
               <View
                 style={[
                   styles.checkCircle,
                   {
-                    backgroundColor: checked
+                    backgroundColor: status.hasInteracted
                       ? Colors.dark.secondary
-                      : colors.tabIconDefault,
-                    borderColor: checked ? Colors.dark.secondary : '#cccccc',
+                      : status.missedDay
+                        ? '#FF6B6B'
+                        : status.isFuture
+                          ? colors.tabIconDefault + '40'
+                          : colors.tabIconDefault,
+                    borderColor: status.hasInteracted
+                      ? Colors.dark.secondary
+                      : status.missedDay
+                        ? '#FF6B6B'
+                        : status.isFuture
+                          ? colors.tabIconDefault + '40'
+                          : '#cccccc',
                   },
-                  isToday && styles.todayCircle,
+                  status.isToday && !status.isFuture && styles.todayCircle,
+                  status.isFuture && styles.futureCircle,
                 ]}
               >
-                {checked ? (
+                {status.hasInteracted ? (
                   <Text style={styles.checkmark}>✓</Text>
+                ) : status.missedDay ? (
+                  <Text style={[styles.checkmark, styles.missedMark]}>✕</Text>
+                ) : status.isFuture ? (
+                  <Text style={[styles.checkmark, styles.futureMark]}>•</Text>
                 ) : (
-                  <Text style={styles.checkmark}>x</Text>
+                  <Text style={[styles.checkmark, styles.missedMark]}>✕</Text>
                 )}
               </View>
             </View>
           );
         })}
       </View>
-
-      {/* <Text style={[styles.motivationText, { color: colors.text }]}>
-        interact each day so your streak won't reset
-      </Text> */}
     </Card>
   );
 };
@@ -114,6 +143,9 @@ const styles = StyleSheet.create({
     fontSize: 12,
     fontWeight: '500',
   },
+  futureText: {
+    opacity: 0.5,
+  },
   checkCircle: {
     width: 36,
     height: 36,
@@ -124,16 +156,35 @@ const styles = StyleSheet.create({
   },
   todayCircle: {
     borderWidth: 3,
+    shadowColor: Colors.dark.secondary,
+    shadowOffset: { width: 0, height: 0 },
+    shadowOpacity: 0.5,
+    shadowRadius: 4,
+    elevation: 4,
+  },
+  futureCircle: {
+    opacity: 0.4,
+    borderStyle: 'dashed',
   },
   checkmark: {
     color: '#FFFFFF',
     fontSize: 18,
     fontWeight: 'bold',
   },
+  missedMark: {
+    color: '#FFFFFF',
+    fontSize: 16,
+  },
+  futureMark: {
+    color: '#FFFFFF',
+    fontSize: 24,
+    opacity: 0.6,
+  },
   motivationText: {
     fontSize: 12,
     textAlign: 'center',
     fontStyle: 'italic',
+    marginTop: 4,
   },
 });
 

@@ -1,21 +1,22 @@
-import { SearchIcon } from '@/components/icons/SearchIcon';
+import { Shimmer } from '@/components/ui/Shimmer';
 import { Colors } from '@/constants/theme';
+import { fetchReciters } from '@/services/reciters';
+import { Reciter } from '@/types/reciterTypes';
+import { getInitials } from '@/utils/textUtils';
+import { useQuery } from '@tanstack/react-query';
 import { router } from 'expo-router';
-import React, { useState } from 'react';
+import React from 'react';
 import {
-  View,
-  Text,
-  StyleSheet,
+  Image,
   ScrollView,
   StatusBar,
-  useColorScheme,
+  StyleSheet,
+  Text,
   TouchableOpacity,
+  useColorScheme,
+  View,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { queryClient } from '../utils/queryClient';
-import { useQuery } from '@tanstack/react-query';
-import { getChapters } from '@/services/quranApi';
-import { Surah } from '@/types/quranTypes';
 
 const QuranScreen = () => {
   const colorScheme = useColorScheme();
@@ -23,23 +24,18 @@ const QuranScreen = () => {
   const scheme: ColorSchemeKey = (colorScheme ?? 'light') as ColorSchemeKey;
   const colors = Colors[scheme] as (typeof Colors)['light'];
 
-  const [selectedTab, setSelectedTab] = useState('Sura');
-
-  const lastReadSurahs = [
-    { name: 'Al-Baqarah', verse: 'Verse 285' },
-    { name: 'Al-Mumtahanah', verse: 'Verse 9' },
-    { name: 'Al-Mulk', verse: 'Verse 12' },
-  ];
-
-  const {
-    data: surahs,
-    isLoading,
-    isError,
-    error,
-  } = useQuery<Surah[]>({
-    queryKey: ['chapters'],
-    queryFn: () => getChapters(),
+  const { data: reciters, isLoading } = useQuery({
+    queryKey: ['reciters'],
+    queryFn: fetchReciters,
+    staleTime: 5 * 60 * 1000,
   });
+
+  const handleReciterPress = (reciter: Reciter) => {
+    router.push({
+      pathname: '/reciters/[reciterId]',
+      params: { reciterId: reciter.id, name: reciter.name },
+    });
+  };
 
   return (
     <SafeAreaView
@@ -51,72 +47,90 @@ const QuranScreen = () => {
         backgroundColor="transparent"
       />
 
-      {/* Header */}
       <View style={[styles.header, { backgroundColor: colors.background }]}>
         <Text style={[styles.headerTitle, { color: colors.text }]}>
           Al Quran
         </Text>
-        <TouchableOpacity style={[styles.searchButton]}>
-          <SearchIcon width={25} height={25} color={Colors.dark.secondary} />
-        </TouchableOpacity>
       </View>
 
       <ScrollView
         style={styles.scrollView}
         showsVerticalScrollIndicator={false}
       >
-        {/* Surah List */}
-        <View style={styles.surahList}>
-          {surahs?.map((surah: Surah) => (
+        <View style={styles.reciterList}>
+          {isLoading &&
+            Array.from({ length: 4 }).map((_, index) => (
+              <View
+                key={index}
+                style={[
+                  styles.reciterItem,
+                  {
+                    borderBottomColor:
+                      scheme === 'dark' ? colors.cardBgAlt : '#F0F0F0',
+                  },
+                ]}
+              >
+                <View style={styles.reciterLeft}>
+                  <Shimmer width={40} height={40} borderRadius={20} />
+                  <View style={[styles.reciterInfo, { marginLeft: 16, gap: 6 }]}>
+                    <Shimmer width="50%" height={14} />
+                    <Shimmer width="35%" height={12} />
+                  </View>
+                </View>
+              </View>
+            ))}
+
+          {reciters?.map((reciter) => (
             <TouchableOpacity
-              key={surah.id}
+              key={reciter.id}
               style={[
-                styles.surahItem,
+                styles.reciterItem,
                 {
                   borderBottomColor:
                     scheme === 'dark' ? colors.cardBgAlt : '#F0F0F0',
                 },
               ]}
-              onPress={() =>
-                router.push({
-                  pathname: '/(home)/SurahDetails',
-                  params: {
-                    number: surah.id.toString(),
-                    name: surah.name_complex,
-                    arabic: surah.name_arabic,
-                    verses: surah.verses_count,
-                    revelation: surah.revelation_place,
-                  },
-                })
-              }
+              onPress={() => handleReciterPress(reciter)}
             >
-              <View style={styles.surahLeft}>
+              <View style={styles.reciterLeft}>
                 <View
                   style={[
-                    styles.surahNumberContainer,
-                    { borderColor: Colors.dark.secondary },
+                    styles.avatarContainer,
+                    {
+                      borderColor:
+                        scheme === 'dark' ? colors.cardBgAlt : '#E0E0E0',
+                      backgroundColor: colors.cardBgAlt,
+                    },
                   ]}
                 >
-                  <Text
-                    style={[
-                      styles.surahNumber,
-                      { color: Colors.dark.secondary },
-                    ]}
-                  >
-                    {surah.id}
-                  </Text>
+                  {reciter.avatar ? (
+                    <Image
+                      source={{ uri: reciter.avatar }}
+                      style={styles.avatarImage}
+                    />
+                  ) : (
+                    <Text
+                      style={[
+                        styles.avatarInitials,
+                        { color: Colors.dark.secondary },
+                      ]}
+                    >
+                      {getInitials(reciter.name)}
+                    </Text>
+                  )}
                 </View>
-                <View style={styles.surahInfo}>
-                  <Text style={[styles.surahName, { color: colors.text }]}>
-                    {surah.name_complex}
+                <View style={styles.reciterInfo}>
+                  <Text style={[styles.reciterName, { color: colors.text }]}>
+                    {reciter.name}
                   </Text>
-                  <Text style={[styles.surahDetails, { color: '#A67C52' }]}>
-                    {surah.verses_count} | {surah.revelation_place}
+                  <Text style={[styles.reciterDetails, { color: '#A67C52' }]}>
+                    {reciter.country}
+                    {reciter.style ? ` | ${reciter.style}` : ''}
                   </Text>
                 </View>
               </View>
-              <Text style={[styles.surahArabic, { color: colors.text }]}>
-                {surah.name_arabic}
+              <Text style={[styles.reciterCount, { color: colors.icon }]}>
+                {reciter.availableSurahIds.length}/114
               </Text>
             </TouchableOpacity>
           ))}
@@ -132,9 +146,6 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
   },
-  scrollView: {
-    flex: 1,
-  },
   header: {
     flexDirection: 'row',
     justifyContent: 'space-between',
@@ -142,110 +153,61 @@ const styles = StyleSheet.create({
     paddingHorizontal: 20,
     paddingVertical: 16,
   },
-  menuButton: {
-    width: 40,
-    height: 40,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  menuIcon: {
-    fontSize: 24,
-  },
   headerTitle: {
     fontSize: 20,
     fontWeight: '600',
   },
-  searchButton: {
-    width: 40,
-    height: 40,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  searchIcon: {
-    fontSize: 20,
-  },
-  tabContainer: {
-    flexDirection: 'row',
-    marginHorizontal: 20,
-    borderRadius: 12,
-    padding: 4,
-    marginBottom: 20,
-  },
-  tab: {
+  scrollView: {
     flex: 1,
-    paddingVertical: 10,
-    borderRadius: 10,
-    alignItems: 'center',
   },
-  tabText: {
-    fontSize: 13,
-    fontWeight: '500',
-  },
-  tabTextActive: {
-    fontWeight: '600',
-  },
-  surahList: {
+  reciterList: {
     paddingHorizontal: 20,
-    paddingBottom: 100,
+    paddingBottom: 20,
   },
-  surahItem: {
+  reciterItem: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
     paddingVertical: 16,
     borderBottomWidth: 1,
   },
-  surahLeft: {
+  reciterLeft: {
     flexDirection: 'row',
     alignItems: 'center',
     flex: 1,
   },
-  surahNumberContainer: {
+  avatarContainer: {
     width: 40,
     height: 40,
     borderRadius: 20,
-    borderWidth: 2,
+    borderWidth: 1,
     justifyContent: 'center',
     alignItems: 'center',
     marginRight: 16,
+    overflow: 'hidden',
   },
-  surahNumber: {
+  avatarImage: {
+    width: '100%',
+    height: '100%',
+  },
+  avatarInitials: {
     fontSize: 14,
     fontWeight: '600',
   },
-  surahInfo: {
+  reciterInfo: {
     flex: 1,
   },
-  surahName: {
-    fontSize: 16,
+  reciterName: {
+    fontSize: 14,
     fontWeight: '600',
     marginBottom: 4,
   },
-  surahDetails: {
+  reciterDetails: {
     fontSize: 12,
   },
-  surahArabic: {
-    fontSize: 20,
+  reciterCount: {
+    fontSize: 12,
     fontWeight: '600',
     marginLeft: 16,
-  },
-  bottomNav: {
-    flexDirection: 'row',
-    justifyContent: 'space-around',
-    paddingVertical: 12,
-    paddingBottom: 8,
-    borderTopWidth: 1,
-  },
-  navItem: {
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  navIcon: {
-    fontSize: 24,
-    marginBottom: 4,
-  },
-  navLabel: {
-    fontSize: 11,
-    fontWeight: '500',
   },
 });
