@@ -5,12 +5,10 @@
     "country": "Gambia",
     "avatar": "https://cdn.jsdelivr.net/gh/mahad8v/Muhammed-Okasha@master/app/assets/images/muhammed-okasha-badjie.jpeg",
     "availableSurahIds": [
-      2,
-      12
+      2
     ],
     "audioUrls": {
-      "2": "https://archive.org/download/surah-02/surah-02.mp3",
-      "12": "https://archive.org/details/muhammed-okasha-badjiesurah-012.mp3"
+      "2": "https://archive.org/download/surah-02/surah-02.mp3"
     }
   }
 ]
