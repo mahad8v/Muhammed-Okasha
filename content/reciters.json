@@ -4,11 +4,7 @@
     "name": "Muhammed Okasha Badjie",
     "country": "Gambia",
     "avatar": "https://cdn.jsdelivr.net/gh/mahad8v/Muhammed-Okasha@master/app/assets/images/muhammed-okasha-badjie.jpeg",
-    "availableSurahIds": [
-      12
-    ],
-    "audioUrls": {
-      "12": "https://archive.org/download/muhammed-okasha-badjiesurah-012.mp3/Beautiful%20Recitation%20Of%20Surah%20Yusuf%20%2019%20Minute%20%20By%20Muhammad%20Okasha%20Badjie.mp3"
-    }
+    "availableSurahIds": [],
+    "audioUrls": {}
   }
 ]
