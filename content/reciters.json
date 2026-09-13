@@ -4,11 +4,7 @@
     "name": "Muhammed Okasha Badjie",
     "country": "Gambia",
     "avatar": "https://cdn.jsdelivr.net/gh/mahad8v/Muhammed-Okasha@master/app/assets/images/muhammed-okasha-badjie.jpeg",
-    "availableSurahIds": [
-      2
-    ],
-    "audioUrls": {
-      "2": "https://archive.org/download/surah-02/surah-02.mp3"
-    }
+    "availableSurahIds": [],
+    "audioUrls": {}
   }
 ]
