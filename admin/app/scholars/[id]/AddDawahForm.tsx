@@ -1,31 +1,16 @@
 "use client";
 
 import { useActionState } from "react";
-import { addSurahToReciter, AddSurahFormState } from "@/lib/reciters";
-import { SurahRef } from "@/lib/surahs";
+import { addDawahToScholar, AddDawahFormState } from "@/lib/scholars";
 
-const initialState: AddSurahFormState = {};
+const initialState: AddDawahFormState = {};
 
-export function AddSurahForm({
-  reciterId,
-  availableSurahs,
-}: {
-  reciterId: string;
-  availableSurahs: SurahRef[];
-}) {
-  const boundAction = addSurahToReciter.bind(null, reciterId);
+export function AddDawahForm({ scholarId }: { scholarId: string }) {
+  const boundAction = addDawahToScholar.bind(null, scholarId);
   const [state, formAction, isPending] = useActionState(
     boundAction,
     initialState,
   );
-
-  if (availableSurahs.length === 0) {
-    return (
-      <p className="text-sm text-slate-500">
-        All 114 surahs have been added for this reciter.
-      </p>
-    );
-  }
 
   return (
     <form
@@ -40,24 +25,19 @@ export function AddSurahForm({
 
       <div className="flex-1">
         <label className="block text-xs font-medium text-slate-600">
-          Surah
+          Title
         </label>
-        <select
-          name="surahId"
+        <input
+          name="title"
           required
+          placeholder="e.g. The Importance of Sincerity"
           className="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 text-sm focus:border-[#8B6F47] focus:outline-none focus:ring-2 focus:ring-[#8B6F47]/15"
-        >
-          {availableSurahs.map((surah) => (
-            <option key={surah.id} value={surah.id}>
-              {surah.id}. {surah.name}
-            </option>
-          ))}
-        </select>
+        />
       </div>
 
       <div className="flex-[2]">
         <label className="block text-xs font-medium text-slate-600">
-          Audio URL
+          Audio/Video URL
         </label>
         <input
           name="url"

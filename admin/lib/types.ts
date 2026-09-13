@@ -8,10 +8,16 @@ export interface Reciter {
   audioUrls?: Record<string, string>;
 }
 
+export interface DawahItem {
+  title: string;
+  url: string;
+}
+
 export interface Scholar {
   id: string;
   name: string;
   title?: string;
   country: string;
   avatar?: string;
+  dawahItems?: DawahItem[];
 }

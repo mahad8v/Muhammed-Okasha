@@ -1,0 +1,8 @@
+{
+  "dependencies": {
+    "@gorhom/bottom-sheet": "^5.2.8",
+    "expo-audio": "^1.1.1",
+    "expo-av": "^16.0.8",
+    "expo-linear-gradient": "^15.0.8"
+  }
+}

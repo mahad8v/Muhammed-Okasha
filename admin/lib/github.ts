@@ -53,20 +53,36 @@ export async function readJsonFile<T>(
   return { content: JSON.parse(raw) as T, sha: data.sha };
 }
 
+const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
+
 /**
  * jsDelivr caches `@branch` references for a while — without this, a saved
  * edit here could take hours to actually show up in the app. Purging is
- * best-effort: if it fails, the commit itself has still succeeded and
- * jsDelivr's cache will expire on its own.
+ * best-effort: if it still fails after retrying, the commit itself has
+ * already succeeded and jsDelivr's cache will expire on its own eventually.
+ *
+ * There's a small race: jsDelivr's purge re-fetches from GitHub's raw
+ * content immediately, which can momentarily still be the pre-commit
+ * version. A short delay before the first attempt, plus one retry, makes
+ * this reliable in practice instead of occasionally purging a stale copy
+ * right back into the cache.
  */
 async function purgeJsdelivrCache(path: string): Promise<void> {
   const { owner, repo, branch } = getConfig();
-  try {
-    await fetch(
-      `https://purge.jsdelivr.net/gh/${owner}/${repo}@${branch}/${path}`,
-    );
-  } catch (error) {
-    console.warn(`jsDelivr purge failed for ${path}:`, error);
+  const url = `https://purge.jsdelivr.net/gh/${owner}/${repo}@${branch}/${path}`;
+
+  for (const delayMs of [800, 2500]) {
+    await sleep(delayMs);
+    try {
+      const response = await fetch(url);
+      const body = await response.json().catch(() => null);
+      if (response.ok && body?.status !== 'error') {
+        return;
+      }
+      console.warn(`jsDelivr purge for ${path} returned:`, body ?? response.status);
+    } catch (error) {
+      console.warn(`jsDelivr purge request failed for ${path}:`, error);
+    }
   }
 }
 

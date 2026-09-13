@@ -38,7 +38,7 @@ const DawaScreen = () => {
       />
 
       <View style={[styles.header, { backgroundColor: colors.background }]}>
-        <Text style={[styles.headerTitle, { color: colors.text }]}>Dawa</Text>
+        <Text style={[styles.headerTitle, { color: colors.text }]}>Dawah</Text>
       </View>
 
       <ScrollView

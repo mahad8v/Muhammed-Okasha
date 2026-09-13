@@ -1,7 +1,13 @@
 @import "tailwindcss";
 
+/*
+ * This admin tool is intentionally always light-themed (not adaptive to
+ * OS/browser dark mode) — deliberately no `prefers-color-scheme: dark`
+ * override here, since a stray one previously forced the page background
+ * to near-black regardless of the Tailwind utility classes used in JSX.
+ */
 :root {
-  --background: #ffffff;
+  --background: #fbf9f5;
   --foreground: #171717;
 }
 
@@ -10,13 +16,6 @@
   --color-foreground: var(--foreground);
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
 }
 
 body {

@@ -60,7 +60,11 @@ export default function Qibla() {
       calculateQiblaDirection(loc.coords.latitude, loc.coords.longitude);
 
       const sub = Magnetometer.addListener((data) => {
-        let angle = Math.atan2(data.y, data.x) * (180 / Math.PI);
+        // Compass heading from a flat device: +y is toward the top of the
+        // phone, +x toward the right, so true heading is atan2(x, y) — not
+        // atan2(y, x), which was rotating the reading ~90° off and pointing
+        // the Qibla arrow in the wrong direction.
+        let angle = Math.atan2(data.x, data.y) * (180 / Math.PI);
         angle = angle < 0 ? angle + 360 : angle;
         setMagnetometer(angle);
       });

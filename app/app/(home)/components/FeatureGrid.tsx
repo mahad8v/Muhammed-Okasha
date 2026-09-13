@@ -19,7 +19,7 @@ export const FeaturesGrid: React.FC<FeaturesGridProps> = ({ colors }) => {
       {
         icon: HolyIcon,
         title: 'Quran',
-        subtitle: 'Read and Listen',
+        subtitle: 'Read quran',
         route: '/quran',
       },
       {
