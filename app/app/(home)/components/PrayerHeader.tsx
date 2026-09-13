@@ -27,10 +27,10 @@ export const PrayerHeader: React.FC<PrayerHeaderProps> = ({
     <View style={styles.imageContainer}>
       <Image
         style={styles.image}
-        source="https://cdn.pixabay.com/photo/2018/12/17/14/25/mosque-3880493_960_720.jpg"
+        source={require('@/assets/images/backgroundimage.png')}
         placeholder={{ blurhash }}
         contentFit="cover"
-        contentPosition="top"
+        contentPosition="center"
         transition={1000}
       />
       <View style={styles.overlay} />

@@ -1,8 +1,9 @@
 'use server';
 
 import { revalidatePath } from 'next/cache';
+import { resolveAudioUrl } from './audioUrl';
 import { readJsonFile, writeJsonFile } from './github';
-import { Scholar } from './types';
+import { DawahItem, Scholar } from './types';
 
 const SCHOLARS_PATH = 'content/scholars.json';
 
@@ -116,4 +117,81 @@ export async function deleteScholar(id: string): Promise<void> {
   );
 
   revalidatePath('/scholars');
+}
+
+export interface AddDawahFormState {
+  error?: string;
+}
+
+export async function addDawahToScholar(
+  scholarId: string,
+  _prevState: AddDawahFormState,
+  formData: FormData,
+): Promise<AddDawahFormState> {
+  const title = String(formData.get('title') || '').trim();
+  const rawUrl = String(formData.get('url') || '').trim();
+
+  if (!title) {
+    return { error: 'Title is required.' };
+  }
+  if (!rawUrl) {
+    return { error: 'URL is required.' };
+  }
+
+  const resolved = await resolveAudioUrl(rawUrl);
+  if ('error' in resolved) {
+    return { error: resolved.error };
+  }
+  const url = resolved.url;
+
+  const { content: scholars, sha } =
+    await readJsonFile<Scholar[]>(SCHOLARS_PATH);
+
+  const index = scholars.findIndex((s) => s.id === scholarId);
+  if (index === -1) {
+    return { error: 'Scholar not found.' };
+  }
+
+  const scholar = scholars[index];
+  const newItem: DawahItem = { title, url };
+
+  scholars[index] = {
+    ...scholar,
+    dawahItems: [...(scholar.dawahItems ?? []), newItem],
+  };
+
+  await writeJsonFile(
+    SCHOLARS_PATH,
+    scholars,
+    sha,
+    `Add dawah "${title}" for ${scholar.name}`,
+  );
+
+  revalidatePath(`/scholars/${scholarId}`);
+  return {};
+}
+
+export async function removeDawahFromScholar(
+  scholarId: string,
+  index: number,
+): Promise<void> {
+  const { content: scholars, sha } =
+    await readJsonFile<Scholar[]>(SCHOLARS_PATH);
+
+  const scholarIndex = scholars.findIndex((s) => s.id === scholarId);
+  if (scholarIndex === -1) return;
+
+  const scholar = scholars[scholarIndex];
+  const dawahItems = (scholar.dawahItems ?? []).filter((_, i) => i !== index);
+
+  scholars[scholarIndex] = { ...scholar, dawahItems };
+
+  await writeJsonFile(
+    SCHOLARS_PATH,
+    scholars,
+    sha,
+    `Remove a dawah item from ${scholar.name}`,
+  );
+
+  revalidatePath(`/scholars/${scholarId}`);
 }

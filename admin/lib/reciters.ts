@@ -1,6 +1,7 @@
 'use server';
 
 import { revalidatePath } from 'next/cache';
+import { resolveAudioUrl } from './audioUrl';
 import { readJsonFile, writeJsonFile } from './github';
 import { Reciter } from './types';
 
@@ -140,14 +141,20 @@ export async function addSurahToReciter(
   formData: FormData,
 ): Promise<AddSurahFormState> {
   const surahId = Number(formData.get('surahId'));
-  const url = String(formData.get('url') || '').trim();
+  const rawUrl = String(formData.get('url') || '').trim();
 
   if (!surahId || surahId < 1 || surahId > 114) {
     return { error: 'Pick a valid surah.' };
   }
-  if (!url) {
+  if (!rawUrl) {
     return { error: 'Audio URL is required.' };
   }
+
+  const resolved = await resolveAudioUrl(rawUrl);
+  if ('error' in resolved) {
+    return { error: resolved.error };
+  }
+  const url = resolved.url;
 
   const { content: reciters, sha } =
     await readJsonFile<Reciter[]>(RECITERS_PATH);

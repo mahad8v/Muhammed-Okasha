@@ -61,6 +61,24 @@ export default function QuranLayout() {
           ),
         }}
       />
+
+      {/* Manage downloaded (offline) surahs */}
+      <Stack.Screen
+        name="downloads"
+        options={{
+          title: 'Downloads',
+          headerBackTitle: 'Quran',
+          headerLeft: () => (
+            <TouchableOpacity onPress={() => router.back()}>
+              <BackIcon
+                width={24}
+                height={24}
+                color={Colors[colorScheme ?? 'light'].text}
+              />
+            </TouchableOpacity>
+          ),
+        }}
+      />
     </Stack>
   );
 }

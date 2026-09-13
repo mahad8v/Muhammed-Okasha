@@ -28,10 +28,10 @@ const SurahDetailScreen = () => {
   const colors = Colors[scheme];
 
   const surah = {
-    number: params.number,
-    name: params.name || 'An-Nisa',
-    arabic: params.arabic || 'النساء',
-    verses: params.verses || '176 Verses',
+    number: params.id,
+    name: params.name,
+    arabic: params.arabic,
+    verses: params.verses,
     revelation: params.revelation,
   };
 
@@ -47,6 +47,8 @@ const SurahDetailScreen = () => {
     queryKey: ['verses', surah.number],
     queryFn: () => getVerses(Number(surah.number)),
     enabled: !!surah.number,
+    staleTime: Infinity,
+    gcTime: Infinity,
   });
 
   const player = useAudioPlayer();
@@ -218,11 +220,6 @@ const SurahDetailScreen = () => {
             {/* Arabic Text */}
             <Text style={[styles.arabicText, { color: colors.text }]}>
               {verse.text_uthmani || verse.text}
-            </Text>
-
-            {/* Translation */}
-            <Text style={[styles.translationText, { color: colors.icon }]}>
-              {verse.translations?.[0]?.text || 'Translation not available'}
             </Text>
           </Card>
         ))}

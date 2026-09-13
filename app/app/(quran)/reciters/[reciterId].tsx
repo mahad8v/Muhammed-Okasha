@@ -16,8 +16,8 @@ import {
 import { Surah } from '@/types/quranTypes';
 import { Ionicons } from '@expo/vector-icons';
 import { useQuery } from '@tanstack/react-query';
-import { useLocalSearchParams } from 'expo-router';
-import React, { useMemo, useState } from 'react';
+import { useFocusEffect, useLocalSearchParams } from 'expo-router';
+import React, { useCallback, useMemo, useState } from 'react';
 import {
   ActivityIndicator,
   ScrollView,
@@ -61,6 +61,8 @@ const ReciterSurahsScreen = () => {
     currentSurahId,
     currentReciterId,
     currentSurahName,
+    currentTime,
+    duration,
     canPlayPrevious,
     canPlayNext,
     playSurah,
@@ -68,6 +70,7 @@ const ReciterSurahsScreen = () => {
     playNext,
     playPrevious,
     stopPlayback,
+    seekTo,
   } = useAudioPlayerContext();
 
   const isThisReciterPlaying = currentReciterId === reciterId;
@@ -76,6 +79,15 @@ const ReciterSurahsScreen = () => {
   const [downloadProgress, setDownloadProgress] = useState<
     Record<number, number>
   >({});
+
+  // Deletions can also happen from the standalone Downloads screen, so
+  // re-scan the filesystem whenever this screen regains focus, not just
+  // after downloads/deletes made directly here.
+  useFocusEffect(
+    useCallback(() => {
+      setDownloadVersion((version) => version + 1);
+    }, []),
+  );
 
   const downloadedIds = useMemo(() => {
     if (!reciter || !surahs) return new Set<number>();
@@ -307,11 +319,14 @@ const ReciterSurahsScreen = () => {
           isPlaying={isPlaying}
           currentVerseNumber={currentSurahId}
           currentSurahName={currentSurahName}
+          currentTime={currentTime}
+          duration={duration}
           canPlayPrevious={canPlayPrevious}
           canPlayNext={canPlayNext}
           onPlayPause={togglePlayPause}
           onNext={playNext}
           onPrevious={playPrevious}
+          onSeek={seekTo}
           onClose={stopPlayback}
           showCloseButton={true}
         />

@@ -7,16 +7,12 @@ export const getChapters = async (): Promise<Surah[]> => {
 };
 
 /**
- * Fetches verses for a given chapter with Arabic text and English translation
- * Uses Al-Quran Cloud API which has a simpler, more reliable response structure
+ * Fetches the Arabic (Uthmani script) text for every verse of a chapter.
+ * Uses Al-Quran Cloud API which has a simpler, more reliable response structure.
  */
-
-// services/quranApi.ts
-
 export const getVerses = async (chapterId: number): Promise<any[]> => {
-  // Fetch Arabic text, translation, and audio
   const response = await fetch(
-    `https://api.alquran.cloud/v1/surah/${chapterId}/editions/quran-uthmani,en.asad,ar.alafasy`,
+    `https://api.alquran.cloud/v1/surah/${chapterId}/quran-uthmani`,
   );
 
   if (!response.ok) {
@@ -25,44 +21,39 @@ export const getVerses = async (chapterId: number): Promise<any[]> => {
 
   const data = await response.json();
 
-  if (!data.data || data.data.length < 3) {
+  if (!data.data?.ayahs) {
     throw new Error('Invalid API response structure');
   }
 
-  const arabicVerses = data.data[0].ayahs;
-  const englishVerses = data.data[1].ayahs;
-  const audioVerses = data.data[2].ayahs;
+  const arabicVerses = data.data.ayahs;
 
-  // Fetch word-by-word data from quran.com API
-  const wordTimingsPromises = arabicVerses.map(async (ayah: any) => {
-    try {
-      const wordResponse = await fetch(
-        `https://api.quran.com/api/v4/verses/by_key/${chapterId}:${ayah.numberInSurah}?words=true&word_fields=text_uthmani,audio_url&audio=7`,
-      );
-      const wordData = await wordResponse.json();
-      return wordData.verse;
-    } catch (error) {
-      console.error('Error fetching word timings:', error);
-      return null;
+  // The Uthmani script embeds the Bismillah into the text of ayah 1 for
+  // every surah except At-Tawbah (9) — but the surah screen already shows
+  // it once as a standalone heading above the verses, so strip it back out
+  // of ayah 1's text here to avoid displaying it twice. Left untouched for
+  // Al-Fatihah, whose ayah 1 *is* the Bismillah and nothing else.
+  // NFC-normalized because the API's combining diacritics (e.g. shadda vs.
+  // fatha) aren't always in the same order as a hand-typed literal, which
+  // otherwise makes startsWith() silently fail despite an identical glyph.
+  const BISMILLAH = 'بِسْمِ ٱللَّهِ ٱلرَّحْمَٰنِ ٱلرَّحِيمِ'.normalize('NFC');
+
+  return arabicVerses.map((ayah: any) => {
+    let text = ayah.text.replace(/^﻿/, '').normalize('NFC');
+    if (
+      chapterId !== 9 &&
+      ayah.numberInSurah === 1 &&
+      text.startsWith(BISMILLAH) &&
+      text.trim() !== BISMILLAH
+    ) {
+      text = text.slice(BISMILLAH.length).trim();
     }
+
+    return {
+      id: ayah.number,
+      verse_number: ayah.numberInSurah,
+      verse_key: `${chapterId}:${ayah.numberInSurah}`,
+      text_uthmani: text,
+      text,
+    };
   });
-
-  const wordTimingsData = await Promise.all(wordTimingsPromises);
-
-  return arabicVerses.map((ayah: any, index: number) => ({
-    id: ayah.number,
-    verse_number: ayah.numberInSurah,
-    verse_key: `${chapterId}:${ayah.numberInSurah}`,
-    text_uthmani: ayah.text,
-    text: ayah.text,
-    audio: audioVerses[index]?.audio,
-    words: wordTimingsData[index]?.words || [],
-    translations: [
-      {
-        id: index,
-        resource_id: 1,
-        text: englishVerses[index]?.text || '',
-      },
-    ],
-  }));
 };

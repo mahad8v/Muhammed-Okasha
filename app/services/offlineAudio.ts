@@ -58,3 +58,41 @@ export const deleteDownloadedSurah = (
     file.delete();
   }
 };
+
+const getAudioRoot = (): Directory => {
+  const directory = new Directory(Paths.document, AUDIO_ROOT_NAME);
+  if (!directory.exists) {
+    directory.create({ intermediates: true });
+  }
+  return directory;
+};
+
+/** Reciter ids that have at least one downloaded surah on this device. */
+export const listDownloadedReciterIds = (): string[] =>
+  getAudioRoot()
+    .list()
+    .filter((entry): entry is Directory => entry instanceof Directory)
+    .map((entry) => entry.name);
+
+/** Surah ids downloaded for a given reciter, sorted ascending. */
+export const listDownloadedSurahIds = (reciterId: string): number[] =>
+  getReciterDirectory(reciterId)
+    .list()
+    .filter((entry): entry is File => entry instanceof File)
+    .map((entry) => parseInt(entry.name.replace(/^surah-|\.mp3$/g, ''), 10))
+    .filter((id) => !Number.isNaN(id))
+    .sort((a, b) => a - b);
+
+export const deleteAllDownloadsForReciter = (reciterId: string): void => {
+  const directory = getReciterDirectory(reciterId);
+  if (directory.exists) {
+    directory.delete();
+  }
+};
+
+export const deleteAllDownloads = (): void => {
+  const root = getAudioRoot();
+  if (root.exists) {
+    root.delete();
+  }
+};

@@ -1,11 +1,13 @@
+import SurahList from '@/app/(quran)/components/SurahList';
 import { Shimmer } from '@/components/ui/Shimmer';
 import { Colors } from '@/constants/theme';
 import { fetchReciters } from '@/services/reciters';
 import { Reciter } from '@/types/reciterTypes';
 import { getInitials } from '@/utils/textUtils';
+import { Ionicons } from '@expo/vector-icons';
 import { useQuery } from '@tanstack/react-query';
 import { router } from 'expo-router';
-import React from 'react';
+import React, { useState } from 'react';
 import {
   Image,
   ScrollView,
@@ -18,16 +20,21 @@ import {
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
+type QuranTab = 'listen' | 'read';
+
 const QuranScreen = () => {
   const colorScheme = useColorScheme();
   type ColorSchemeKey = keyof typeof Colors;
   const scheme: ColorSchemeKey = (colorScheme ?? 'light') as ColorSchemeKey;
   const colors = Colors[scheme] as (typeof Colors)['light'];
 
+  const [activeTab, setActiveTab] = useState<QuranTab>('listen');
+
   const { data: reciters, isLoading } = useQuery({
     queryKey: ['reciters'],
     queryFn: fetchReciters,
     staleTime: 5 * 60 * 1000,
+    enabled: activeTab === 'listen',
   });
 
   const handleReciterPress = (reciter: Reciter) => {
@@ -51,17 +58,87 @@ const QuranScreen = () => {
         <Text style={[styles.headerTitle, { color: colors.text }]}>
           Al Quran
         </Text>
+        {activeTab === 'listen' && (
+          <TouchableOpacity onPress={() => router.push('/downloads')}>
+            <Ionicons
+              name="download-outline"
+              size={22}
+              color={Colors.dark.secondary}
+            />
+          </TouchableOpacity>
+        )}
       </View>
 
-      <ScrollView
-        style={styles.scrollView}
-        showsVerticalScrollIndicator={false}
+      <View
+        style={[
+          styles.tabContainer,
+          { backgroundColor: scheme === 'dark' ? colors.cardBg : '#F3F4F6' },
+        ]}
       >
-        <View style={styles.reciterList}>
-          {isLoading &&
-            Array.from({ length: 4 }).map((_, index) => (
-              <View
-                key={index}
+        {(['listen', 'read'] as const).map((tab) => (
+          <TouchableOpacity
+            key={tab}
+            style={[
+              styles.tab,
+              activeTab === tab && { backgroundColor: colors.background },
+            ]}
+            onPress={() => setActiveTab(tab)}
+          >
+            <Text
+              style={[
+                styles.tabText,
+                {
+                  color: activeTab === tab ? colors.text : colors.icon,
+                  fontWeight: activeTab === tab ? '600' : '500',
+                },
+              ]}
+            >
+              {tab === 'listen' ? 'Listen' : 'Read'}
+            </Text>
+          </TouchableOpacity>
+        ))}
+      </View>
+
+      {activeTab === 'read' ? (
+        <ScrollView
+          style={styles.scrollView}
+          showsVerticalScrollIndicator={false}
+        >
+          <SurahList />
+        </ScrollView>
+      ) : (
+        <ScrollView
+          style={styles.scrollView}
+          showsVerticalScrollIndicator={false}
+        >
+          <View style={styles.reciterList}>
+            {isLoading &&
+              Array.from({ length: 4 }).map((_, index) => (
+                <View
+                  key={index}
+                  style={[
+                    styles.reciterItem,
+                    {
+                      borderBottomColor:
+                        scheme === 'dark' ? colors.cardBgAlt : '#F0F0F0',
+                    },
+                  ]}
+                >
+                  <View style={styles.reciterLeft}>
+                    <Shimmer width={40} height={40} borderRadius={20} />
+                    <View
+                      style={[styles.reciterInfo, { marginLeft: 16, gap: 6 }]}
+                    >
+                      <Shimmer width="50%" height={14} />
+                      <Shimmer width="35%" height={12} />
+                    </View>
+                  </View>
+                </View>
+              ))}
+
+            {reciters?.map((reciter) => (
+              <TouchableOpacity
+                key={reciter.id}
                 style={[
                   styles.reciterItem,
                   {
@@ -69,73 +146,55 @@ const QuranScreen = () => {
                       scheme === 'dark' ? colors.cardBgAlt : '#F0F0F0',
                   },
                 ]}
+                onPress={() => handleReciterPress(reciter)}
               >
                 <View style={styles.reciterLeft}>
-                  <Shimmer width={40} height={40} borderRadius={20} />
-                  <View style={[styles.reciterInfo, { marginLeft: 16, gap: 6 }]}>
-                    <Shimmer width="50%" height={14} />
-                    <Shimmer width="35%" height={12} />
+                  <View
+                    style={[
+                      styles.avatarContainer,
+                      {
+                        borderColor:
+                          scheme === 'dark' ? colors.cardBgAlt : '#E0E0E0',
+                        backgroundColor: colors.cardBgAlt,
+                      },
+                    ]}
+                  >
+                    {reciter.avatar ? (
+                      <Image
+                        source={{ uri: reciter.avatar }}
+                        style={styles.avatarImage}
+                      />
+                    ) : (
+                      <Text
+                        style={[
+                          styles.avatarInitials,
+                          { color: Colors.dark.secondary },
+                        ]}
+                      >
+                        {getInitials(reciter.name)}
+                      </Text>
+                    )}
+                  </View>
+                  <View style={styles.reciterInfo}>
+                    <Text style={[styles.reciterName, { color: colors.text }]}>
+                      {reciter.name}
+                    </Text>
+                    <Text
+                      style={[styles.reciterDetails, { color: '#A67C52' }]}
+                    >
+                      {reciter.country}
+                      {reciter.style ? ` | ${reciter.style}` : ''}
+                    </Text>
                   </View>
                 </View>
-              </View>
+                <Text style={[styles.reciterCount, { color: colors.icon }]}>
+                  {reciter.availableSurahIds.length}/114
+                </Text>
+              </TouchableOpacity>
             ))}
-
-          {reciters?.map((reciter) => (
-            <TouchableOpacity
-              key={reciter.id}
-              style={[
-                styles.reciterItem,
-                {
-                  borderBottomColor:
-                    scheme === 'dark' ? colors.cardBgAlt : '#F0F0F0',
-                },
-              ]}
-              onPress={() => handleReciterPress(reciter)}
-            >
-              <View style={styles.reciterLeft}>
-                <View
-                  style={[
-                    styles.avatarContainer,
-                    {
-                      borderColor:
-                        scheme === 'dark' ? colors.cardBgAlt : '#E0E0E0',
-                      backgroundColor: colors.cardBgAlt,
-                    },
-                  ]}
-                >
-                  {reciter.avatar ? (
-                    <Image
-                      source={{ uri: reciter.avatar }}
-                      style={styles.avatarImage}
-                    />
-                  ) : (
-                    <Text
-                      style={[
-                        styles.avatarInitials,
-                        { color: Colors.dark.secondary },
-                      ]}
-                    >
-                      {getInitials(reciter.name)}
-                    </Text>
-                  )}
-                </View>
-                <View style={styles.reciterInfo}>
-                  <Text style={[styles.reciterName, { color: colors.text }]}>
-                    {reciter.name}
-                  </Text>
-                  <Text style={[styles.reciterDetails, { color: '#A67C52' }]}>
-                    {reciter.country}
-                    {reciter.style ? ` | ${reciter.style}` : ''}
-                  </Text>
-                </View>
-              </View>
-              <Text style={[styles.reciterCount, { color: colors.icon }]}>
-                {reciter.availableSurahIds.length}/114
-              </Text>
-            </TouchableOpacity>
-          ))}
-        </View>
-      </ScrollView>
+          </View>
+        </ScrollView>
+      )}
     </SafeAreaView>
   );
 };
@@ -156,6 +215,22 @@ const styles = StyleSheet.create({
   headerTitle: {
     fontSize: 20,
     fontWeight: '600',
+  },
+  tabContainer: {
+    flexDirection: 'row',
+    marginHorizontal: 20,
+    marginBottom: 12,
+    borderRadius: 12,
+    padding: 4,
+  },
+  tab: {
+    flex: 1,
+    paddingVertical: 10,
+    borderRadius: 10,
+    alignItems: 'center',
+  },
+  tabText: {
+    fontSize: 13,
   },
   scrollView: {
     flex: 1,
