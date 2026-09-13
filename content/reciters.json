@@ -4,7 +4,11 @@
     "name": "Muhammed Okasha Badjie",
     "country": "Gambia",
     "avatar": "https://cdn.jsdelivr.net/gh/mahad8v/Muhammed-Okasha@master/app/assets/images/muhammed-okasha-badjie.jpeg",
-    "availableSurahIds": [],
-    "audioUrls": {}
+    "availableSurahIds": [
+      12
+    ],
+    "audioUrls": {
+      "12": "https://archive.org/details/muhammed-okasha-badjiesurah-012.mp3"
+    }
   }
 ]
