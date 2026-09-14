@@ -17,25 +17,31 @@ const TAFSIRS_JSON_URL =
  */
 const FALLBACK_TAFSIRS: TafsirScholar[] = [];
 
+/**
+ * Backfills a stable id for any tafsir item missing one (e.g. items added
+ * before `id` existed in the schema). Downloads and playback both key off
+ * this id, and crash on `undefined`, so this must run before the data is
+ * used anywhere else.
+ */
+const withItemIds = (scholars: TafsirScholar[]): TafsirScholar[] =>
+  scholars.map((scholar) => ({
+    ...scholar,
+    tafsirItems: (scholar.tafsirItems ?? []).map((item, index) =>
+      item.id ? item : { ...item, id: `${scholar.id}-item-${index}` },
+    ),
+  }));
+
 export const fetchTafsirScholars = async (): Promise<TafsirScholar[]> => {
   try {
     const response = await fetch(TAFSIRS_JSON_URL);
     if (!response.ok) {
       throw new Error(`Failed to fetch tafsir scholars: ${response.status}`);
     }
-    return await response.json();
+    const data: TafsirScholar[] = await response.json();
+    return withItemIds(data);
   } catch (error) {
     console.warn('Falling back to bundled tafsir scholars list:', error);
     return FALLBACK_TAFSIRS;
   }
 };
 
-export const isSurahAvailableForTafsirScholar = (
-  scholar: TafsirScholar,
-  surahId: number,
-): boolean => scholar.availableSurahIds.includes(surahId);
-
-export const getTafsirScholarSurahAudioUrl = (
-  scholar: TafsirScholar,
-  surahId: number,
-): string => scholar.audioUrls[surahId] ?? '';
