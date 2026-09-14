@@ -5,6 +5,12 @@
     "country": "Gambia",
     "avatar": "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcS7Ujr0YPiXo1VKdL1v6-g6nbWzbBvA1leO9BwA0iNv2A&s=10",
     "availableSurahIds": [],
-    "audioUrls": {}
+    "audioUrls": {},
+    "tafsirItems": [
+      {
+        "title": "Al Fatiha part 1",
+        "url": "https://archive.org/download/suratu-fatiha-part-1/Suratu%20Fatiha%20part1.mp3"
+      }
+    ]
   }
 ]
