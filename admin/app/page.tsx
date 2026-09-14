@@ -1,14 +1,16 @@
 import Link from "next/link";
 import { getReciters } from "@/lib/reciters";
 import { getScholars } from "@/lib/scholars";
+import { getTafsirScholars } from "@/lib/tafsirs";
 import { getSurahById } from "@/lib/surahs";
-import { MicIcon, BookIcon, PlayCircleIcon, ChevronRightIcon } from "@/app/components/icons";
+import { MicIcon, BookIcon, ScrollIcon, PlayCircleIcon, ChevronRightIcon } from "@/app/components/icons";
 import { Avatar } from "@/app/components/Avatar";
 
 export default async function DashboardPage() {
-  const [reciters, scholars] = await Promise.all([
+  const [reciters, scholars, tafsirScholars] = await Promise.all([
     getReciters(),
     getScholars(),
+    getTafsirScholars(),
   ]);
 
   const totalSurahsCovered = reciters.reduce(
@@ -22,6 +24,12 @@ export default async function DashboardPage() {
       value: reciters.length,
       href: "/reciters",
       icon: MicIcon,
+    },
+    {
+      label: "Tafsir Scholars",
+      value: tafsirScholars.length,
+      href: "/tafsirs",
+      icon: ScrollIcon,
     },
     {
       label: "Scholars",
@@ -46,7 +54,7 @@ export default async function DashboardPage() {
         </p>
       </div>
 
-      <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
         {stats.map((stat) => {
           const Icon = stat.icon;
           return (

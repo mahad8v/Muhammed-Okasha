@@ -9,10 +9,10 @@ import {
 } from '@/services/offlineAudio';
 import { getChapters } from '@/services/quranApi';
 import {
-  fetchReciters,
-  getReciterSurahAudioUrl,
-  isSurahAvailableForReciter,
-} from '@/services/reciters';
+  fetchTafsirScholars,
+  getTafsirScholarSurahAudioUrl,
+  isSurahAvailableForTafsirScholar,
+} from '@/services/tafsirs';
 import { Surah } from '@/types/quranTypes';
 import { Ionicons } from '@expo/vector-icons';
 import { useQuery } from '@tanstack/react-query';
@@ -29,20 +29,20 @@ import {
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
-const ReciterSurahsScreen = () => {
-  const { reciterId } = useLocalSearchParams<{ reciterId: string }>();
+const TafsirScholarSurahsScreen = () => {
+  const { scholarId } = useLocalSearchParams<{ scholarId: string }>();
 
   const colorScheme = useColorScheme();
   type ColorSchemeKey = keyof typeof Colors;
   const scheme: ColorSchemeKey = (colorScheme ?? 'light') as ColorSchemeKey;
   const colors = Colors[scheme];
 
-  const { data: reciters, isLoading: isLoadingReciters } = useQuery({
-    queryKey: ['reciters'],
-    queryFn: fetchReciters,
+  const { data: scholars, isLoading: isLoadingScholars } = useQuery({
+    queryKey: ['tafsirScholars'],
+    queryFn: fetchTafsirScholars,
     staleTime: 5 * 60 * 1000,
   });
-  const reciter = reciters?.find((r) => r.id === reciterId);
+  const scholar = scholars?.find((s) => s.id === scholarId);
 
   const {
     data: surahs,
@@ -52,14 +52,16 @@ const ReciterSurahsScreen = () => {
   } = useQuery<Surah[]>({
     queryKey: ['chapters'],
     queryFn: () => getChapters(),
+    staleTime: Infinity,
+    gcTime: Infinity,
   });
 
-  const isLoading = isLoadingReciters || isLoadingSurahs;
+  const isLoading = isLoadingScholars || isLoadingSurahs;
 
   const {
     isPlaying,
     currentSurahId,
-    currentReciterId,
+    currentReciterId: currentSourceId,
     currentSurahName,
     currentTime,
     duration,
@@ -73,7 +75,7 @@ const ReciterSurahsScreen = () => {
     seekTo,
   } = useAudioPlayerContext();
 
-  const isThisReciterPlaying = currentReciterId === reciterId;
+  const isThisScholarPlaying = currentSourceId === scholarId;
 
   const [downloadVersion, setDownloadVersion] = useState(0);
   const [downloadProgress, setDownloadProgress] = useState<
@@ -90,30 +92,30 @@ const ReciterSurahsScreen = () => {
   );
 
   const downloadedIds = useMemo(() => {
-    if (!reciter || !surahs) return new Set<number>();
+    if (!scholar || !surahs) return new Set<number>();
 
     return new Set(
       surahs
-        .filter((surah) => isSurahDownloaded(reciter.id, surah.id))
+        .filter((surah) => isSurahDownloaded(scholar.id, surah.id))
         .map((surah) => surah.id),
     );
     // downloadVersion is a manual invalidation trigger: downloads/deletes
     // change files on disk directly, outside of React's data flow.
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [reciter, surahs, downloadVersion]);
+  }, [scholar, surahs, downloadVersion]);
 
   const handleDownload = async (surah: Surah) => {
-    if (!reciter || downloadProgress[surah.id] !== undefined) return;
+    if (!scholar || downloadProgress[surah.id] !== undefined) return;
 
     setDownloadProgress((prev) => ({ ...prev, [surah.id]: 0 }));
     try {
-      const remoteUrl = getReciterSurahAudioUrl(reciter, surah.id);
-      await downloadSurah(reciter.id, surah.id, remoteUrl, (fraction) => {
+      const remoteUrl = getTafsirScholarSurahAudioUrl(scholar, surah.id);
+      await downloadSurah(scholar.id, surah.id, remoteUrl, (fraction) => {
         setDownloadProgress((prev) => ({ ...prev, [surah.id]: fraction }));
       });
       setDownloadVersion((version) => version + 1);
     } catch (err) {
-      console.error('Failed to download surah:', err);
+      console.error('Failed to download tafsir:', err);
     } finally {
       setDownloadProgress((prev) => {
         const next = { ...prev };
@@ -124,17 +126,17 @@ const ReciterSurahsScreen = () => {
   };
 
   const handleRemoveDownload = (surah: Surah) => {
-    if (!reciter) return;
-    deleteDownloadedSurah(reciter.id, surah.id);
+    if (!scholar) return;
+    deleteDownloadedSurah(scholar.id, surah.id);
     setDownloadVersion((version) => version + 1);
   };
 
   const handleSurahPress = (surah: Surah) => {
-    if (!reciter || !isSurahAvailableForReciter(reciter, surah.id)) {
+    if (!scholar || !isSurahAvailableForTafsirScholar(scholar, surah.id)) {
       return;
     }
-    playSurah(surah.id, surah.name_complex, reciter.id, (id) =>
-      getReciterSurahAudioUrl(reciter, id),
+    playSurah(surah.id, surah.name_complex, scholar.id, (id) =>
+      getTafsirScholarSurahAudioUrl(scholar, id),
     );
   };
 
@@ -171,14 +173,14 @@ const ReciterSurahsScreen = () => {
     );
   }
 
-  if (!reciter) {
+  if (!scholar) {
     return (
       <SafeAreaView
         edges={['top']}
         style={[styles.container, { backgroundColor: colors.background }]}
       >
         <View style={styles.centerContainer}>
-          <Text style={{ color: colors.text }}>Reciter not found</Text>
+          <Text style={{ color: colors.text }}>Scholar not found</Text>
         </View>
       </SafeAreaView>
     );
@@ -208,14 +210,17 @@ const ReciterSurahsScreen = () => {
         style={styles.scrollView}
         showsVerticalScrollIndicator={false}
         contentContainerStyle={{
-          paddingBottom: isThisReciterPlaying && currentSurahId ? 100 : 20,
+          paddingBottom: isThisScholarPlaying && currentSurahId ? 100 : 20,
         }}
       >
         <View style={styles.surahList}>
           {surahs?.map((surah) => {
-            const available = isSurahAvailableForReciter(reciter, surah.id);
+            const available = isSurahAvailableForTafsirScholar(
+              scholar,
+              surah.id,
+            );
             const isCurrent =
-              isThisReciterPlaying && currentSurahId === surah.id;
+              isThisScholarPlaying && currentSurahId === surah.id;
 
             return (
               <TouchableOpacity
@@ -316,7 +321,7 @@ const ReciterSurahsScreen = () => {
         </View>
       </ScrollView>
 
-      {isThisReciterPlaying && currentSurahId && (
+      {isThisScholarPlaying && currentSurahId && (
         <AudioPlayerController
           isPlaying={isPlaying}
           currentVerseNumber={currentSurahId}
@@ -337,7 +342,7 @@ const ReciterSurahsScreen = () => {
   );
 };
 
-export default ReciterSurahsScreen;
+export default TafsirScholarSurahsScreen;
 
 const styles = StyleSheet.create({
   container: {
@@ -361,8 +366,6 @@ const styles = StyleSheet.create({
     paddingVertical: 10,
     marginBottom: 10,
     paddingHorizontal: 10,
-    // borderBottomWidth: 1,
-
     borderTopLeftRadius: 50,
     borderTopRightRadius: 50,
     borderBottomLeftRadius: 50,

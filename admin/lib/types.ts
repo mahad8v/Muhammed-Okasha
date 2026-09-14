@@ -21,3 +21,13 @@ export interface Scholar {
   avatar?: string;
   dawahItems?: DawahItem[];
 }
+
+export interface TafsirScholar {
+  id: string;
+  name: string;
+  country: string;
+  title?: string;
+  avatar?: string;
+  availableSurahIds: number[];
+  audioUrls?: Record<string, string>;
+}

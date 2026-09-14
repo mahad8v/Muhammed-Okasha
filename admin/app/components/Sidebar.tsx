@@ -2,11 +2,12 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { DashboardIcon, MicIcon, BookIcon } from "./icons";
+import { DashboardIcon, MicIcon, BookIcon, ScrollIcon } from "./icons";
 
 const NAV_ITEMS = [
   { href: "/", label: "Dashboard", icon: DashboardIcon, exact: true },
   { href: "/reciters", label: "Reciters", icon: MicIcon, exact: false },
+  { href: "/tafsirs", label: "Tafsirs", icon: ScrollIcon, exact: false },
   { href: "/scholars", label: "Scholars", icon: BookIcon, exact: false },
 ];
 

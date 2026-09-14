@@ -4,8 +4,10 @@ import { router } from 'expo-router';
 import HolyIcon from '@/components/icons/HolyIcon';
 import PrayerIcon from '@/components/icons/PrayerIcon';
 import BeadIcon from '@/components/icons/BeadIcon';
+import CompassIcon from '@/components/icons/CompassIcon';
 import DawahIcon from '@/components/icons/Dawag';
 import HadithIcon from '@/components/icons/HadithIcon';
+import TafsirIcon from '@/components/icons/TafsirIcon';
 import ZakatIcon from '@/components/icons/ZakatIcon';
 import { FeatureCard } from './FeatureCard';
 
@@ -21,6 +23,20 @@ export const FeaturesGrid: React.FC<FeaturesGridProps> = ({ colors }) => {
         title: 'Quran',
         subtitle: 'Read quran',
         route: '/quran',
+      },
+      {
+        icon: TafsirIcon,
+        title: 'Tafsir',
+        subtitle: 'Surah explained',
+        route: '/tafsir',
+      },
+    ],
+    [
+      {
+        icon: CompassIcon,
+        title: 'Qibla',
+        subtitle: 'Find direction',
+        route: '/qibla',
       },
       {
         icon: PrayerIcon,

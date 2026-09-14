@@ -1,8 +1,8 @@
 import { HapticTab } from '@/components/haptic-tab';
-import CompassIcon from '@/components/icons/CompassIcon';
 import DawahIcon from '@/components/icons/Dawag';
 import { HomeIcon } from '@/components/icons/HomeIcon';
 import { QuranIcon } from '@/components/icons/QuranIcon';
+import TafsirIcon from '@/components/icons/TafsirIcon';
 import { Colors } from '@/constants/theme';
 import { Tabs } from 'expo-router';
 import React from 'react';
@@ -46,11 +46,11 @@ export default function TabLayout() {
       />
 
       <Tabs.Screen
-        name="qibla"
+        name="tafsir"
         options={{
-          title: 'Qibla',
+          title: 'Tafsir',
           tabBarIcon: ({ color }) => (
-            <CompassIcon width={25} height={25} color={color} />
+            <TafsirIcon width={25} height={25} color={color} />
           ),
         }}
       />

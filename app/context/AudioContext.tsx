@@ -1,16 +1,27 @@
 // contexts/AudioPlayerContext.tsx
-import React, { createContext, useContext, useState, useEffect } from 'react';
+import React, {
+  createContext,
+  useContext,
+  useState,
+  useEffect,
+  useRef,
+} from 'react';
 import { Alert } from 'react-native';
 import { useAudioPlayer } from 'expo-audio';
-import { useQuery } from '@tanstack/react-query';
-import { getSurahAudioUrl } from '@/services/audioService';
-import { fetchReciters, getReciterSurahAudioUrl } from '@/services/reciters';
 import { getLocalSurahUri } from '@/services/offlineAudio';
+
+/**
+ * Resolves the audio URL for a given surah id. Supplied by whichever screen
+ * calls playSurah (e.g. a reciter's or a tafsir scholar's own lookup), so
+ * this context stays agnostic to what kind of audio it's playing.
+ */
+type ResolveAudioUrl = (surahId: number) => string;
 
 interface AudioPlayerContextType {
   isPlaying: boolean;
   currentSurahId: number | null;
   currentSurahName: string;
+  /** Id of whichever reciter/tafsir scholar/etc. is currently loaded. */
   currentReciterId: string | null;
   currentTime: number;
   duration: number;
@@ -19,7 +30,8 @@ interface AudioPlayerContextType {
   playSurah: (
     surahId: number,
     surahName: string,
-    reciterId?: string,
+    sourceId: string,
+    resolveUrl: ResolveAudioUrl,
   ) => Promise<void>;
   togglePlayPause: () => void;
   playNext: () => void;
@@ -52,11 +64,9 @@ export const AudioPlayerProvider: React.FC<AudioPlayerProviderProps> = ({
   totalSurahs = 114,
 }) => {
   const player = useAudioPlayer();
-  const { data: reciters } = useQuery({
-    queryKey: ['reciters'],
-    queryFn: fetchReciters,
-    staleTime: 5 * 60 * 1000,
-  });
+  // Remembered so playNext/playPrevious can resolve the adjacent surah's
+  // URL the same way the original playSurah call did.
+  const resolveUrlRef = useRef<ResolveAudioUrl | null>(null);
   const [currentSurahId, setCurrentSurahId] = useState<number | null>(null);
   const [currentSurahName, setCurrentSurahName] = useState<string>('');
   const [currentReciterId, setCurrentReciterId] = useState<string | null>(
@@ -88,28 +98,21 @@ export const AudioPlayerProvider: React.FC<AudioPlayerProviderProps> = ({
   const playSurah = async (
     surahId: number,
     surahName: string,
-    reciterId?: string,
+    sourceId: string,
+    resolveUrl: ResolveAudioUrl,
   ) => {
     try {
-      const reciter = reciterId
-        ? reciters?.find((r) => r.id === reciterId)
-        : undefined;
-      const localUri = reciterId
-        ? getLocalSurahUri(reciterId, surahId)
-        : null;
-      const audioUrl =
-        localUri ??
-        (reciter
-          ? getReciterSurahAudioUrl(reciter, surahId)
-          : getSurahAudioUrl(surahId));
+      resolveUrlRef.current = resolveUrl;
+      const localUri = getLocalSurahUri(sourceId, surahId);
+      const audioUrl = localUri ?? resolveUrl(surahId);
 
       if (!audioUrl) {
         console.error(`No audio URL found for Surah ${surahId}`);
         return;
       }
 
-      // If the same surah/reciter is already loaded, just toggle play/pause
-      if (currentSurahId === surahId && currentReciterId === (reciterId ?? null)) {
+      // If the same surah/source is already loaded, just toggle play/pause
+      if (currentSurahId === surahId && currentReciterId === sourceId) {
         togglePlayPause();
         return;
       }
@@ -119,7 +122,7 @@ export const AudioPlayerProvider: React.FC<AudioPlayerProviderProps> = ({
       player.play();
       setCurrentSurahId(surahId);
       setCurrentSurahName(surahName);
-      setCurrentReciterId(reciterId ?? null);
+      setCurrentReciterId(sourceId);
       setIsPlaying(true);
     } catch (error) {
       console.error('Error playing surah:', error);
@@ -145,24 +148,28 @@ export const AudioPlayerProvider: React.FC<AudioPlayerProviderProps> = ({
   };
 
   const playNext = () => {
-    if (currentSurahId && currentSurahId < totalSurahs) {
+    if (
+      currentSurahId &&
+      currentSurahId < totalSurahs &&
+      currentReciterId &&
+      resolveUrlRef.current
+    ) {
       // You'll need to get the next surah name from your data
-      playSurah(
-        currentSurahId + 1,
-        `Surah ${currentSurahId + 1}`,
-        currentReciterId ?? undefined,
-      );
+      const nextId = currentSurahId + 1;
+      playSurah(nextId, `Surah ${nextId}`, currentReciterId, resolveUrlRef.current);
     }
   };
 
   const playPrevious = () => {
-    if (currentSurahId && currentSurahId > 1) {
+    if (
+      currentSurahId &&
+      currentSurahId > 1 &&
+      currentReciterId &&
+      resolveUrlRef.current
+    ) {
       // You'll need to get the previous surah name from your data
-      playSurah(
-        currentSurahId - 1,
-        `Surah ${currentSurahId - 1}`,
-        currentReciterId ?? undefined,
-      );
+      const prevId = currentSurahId - 1;
+      playSurah(prevId, `Surah ${prevId}`, currentReciterId, resolveUrlRef.current);
     }
   };
 

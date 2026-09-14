@@ -41,9 +41,10 @@ export default function RootLayout() {
               }}
             >
               <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
-              <Stack.Screen name="(qibla)" options={{ headerShown: false }} />
               <Stack.Screen name="(quran)" options={{ headerShown: false }} />
+              <Stack.Screen name="(tafsir)" options={{ headerShown: false }} />
               <Stack.Screen name="dua" options={{ title: 'Dua' }} />
+              <Stack.Screen name="qibla" options={{ title: 'Qibla' }} />
               <Stack.Screen
                 name="hadith/index"
                 options={{ title: 'Hadith' }}
